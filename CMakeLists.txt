@@ -7,16 +7,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_options(-Wall -Wextra)
 
-add_executable(test_tokenizer
-	src/test_tokenizer.cpp
-	src/tokenizer.cpp
-)
-add_executable(homework1
-	src/homework1.cpp
-	src/tokenizer.cpp
-)
-add_executable(test_parser
-	src/test_parser.cpp
+add_executable(compiler
+	src/main.cpp
 	src/tokenizer.cpp
 	src/parser.cpp
 	src/ast.cpp

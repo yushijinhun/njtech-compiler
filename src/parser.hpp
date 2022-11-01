@@ -8,6 +8,7 @@
 class Parser {
   public:
 	explicit Parser(Tokenizer &tokenizer);
+	explicit Parser(std::function<Token()> tokenizer);
 	Parser(const Parser &) = delete;
 
 	std::unique_ptr<ProgramNode> parse();
@@ -41,5 +42,5 @@ class Parser {
 	std::unique_ptr<StatementsNode> parseNestedStatement();
 
   private:
-	Tokenizer &tokenizer;
+	std::function<Token()> tokenizer;
 };

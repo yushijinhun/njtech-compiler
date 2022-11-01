@@ -1,10 +1,13 @@
 #include "parser.hpp"
 
-Parser::Parser(Tokenizer &tokenizer) : tokenizer(tokenizer) {}
+Parser::Parser(Tokenizer &tokenizer)
+    : Parser([&tokenizer] { return tokenizer.next(); }) {}
+
+Parser::Parser(std::function<Token()> tokenizer) : tokenizer(tokenizer) {}
 
 void Parser::next() {
 	last_token_end = current.position + current.str.size();
-	current = tokenizer.next();
+	current = tokenizer();
 }
 
 Token Parser::match(TokenType type) {
