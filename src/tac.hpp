@@ -45,7 +45,7 @@ class TAC {
 
   private:
 	Variable tempVar(const std::string &type);
-	Variable lookupVar(const std::string &name);
+	Variable lookupVar(const std::string &name, int pos);
 	void generate(const std::string &op, Instruction::Arg arg1,
 	              Instruction::Arg arg2, Instruction::Result result);
 

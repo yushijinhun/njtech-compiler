@@ -7,6 +7,9 @@
 
 class ASTNode {
   public:
+	int position_begin;
+	int position_end;
+
 	virtual void print_json(std::ostream &out) const = 0;
 	friend std::ostream &operator<<(std::ostream &out, const ASTNode &ast);
 };

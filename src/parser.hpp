@@ -13,6 +13,7 @@ class Parser {
 	std::unique_ptr<ProgramNode> parse();
 
   private:
+	int last_token_end;
 	Token current;
 	void next();
 	Token match(TokenType type);

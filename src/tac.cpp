@@ -50,10 +50,10 @@ TAC::Variable TAC::tempVar(const std::string &type) {
 	return var;
 }
 
-TAC::Variable TAC::lookupVar(const std::string &name) {
+TAC::Variable TAC::lookupVar(const std::string &name, int pos) {
 	auto var = variable_table.find(name);
 	if (var == variable_table.end()) {
-		throw CompileException(-1, "Unknown identifier: " + name);
+		throw CompileException(pos, "Unknown identifier: " + name);
 	}
 	return var->second;
 }
@@ -115,12 +115,13 @@ void TAC::translateStatement(const StatementNode &node) {
 }
 
 void TAC::translateAssignStatement(const AssignStatementNode &node) {
-	auto variable = lookupVar(node.variable);
+	auto variable = lookupVar(node.variable, node.position_begin);
 	auto expression = translateExpression(*node.expression);
 	if (typeOf(variable) != typeOf(expression)) {
 		throw CompileException(
-		    -1, "Type mismatch in assignment: " + typeOf(variable) + " vs " +
-		            typeOf(expression));
+		    node.position_begin,
+		    "Type mismatch in assignment: " + typeOf(variable) + " vs " +
+		        typeOf(expression));
 	}
 	generate("=", expression, std::nullopt, variable);
 }
@@ -128,8 +129,9 @@ void TAC::translateAssignStatement(const AssignStatementNode &node) {
 void TAC::translateIfStatement(const IfStatementNode &node) {
 	auto condition = translateCondition(*node.condition);
 	if (typeOf(condition) != "bool") {
-		throw CompileException(-1, "If condition is not bool, actual: " +
-		                               typeOf(condition));
+		throw CompileException(node.condition->position_begin,
+		                       "If condition is not bool, actual: " +
+		                           typeOf(condition));
 	}
 	Label trueExit{.num = nextQ + 2};
 	Label falseExit{.num = -1};
@@ -150,8 +152,9 @@ void TAC::translateDoWhileStatement(const DoWhileStatementNode &node) {
 	translateStatements(*node.loop_action);
 	auto condition = translateCondition(*node.condition);
 	if (typeOf(condition) != "bool") {
-		throw CompileException(-1, "Do-while condition is not bool, actual: " +
-		                               typeOf(condition));
+		throw CompileException(node.condition->position_begin,
+		                       "Do-while condition is not bool, actual: " +
+		                           typeOf(condition));
 	}
 	generate("jnz", condition, std::nullopt, loop);
 }
@@ -160,8 +163,12 @@ TAC::Value TAC::translateExpression(const ExpressionNode &node) {
 	auto x = translateItem(*node.items[0]);
 	for (size_t i = 1; i < node.items.size(); i++) {
 		auto y = translateItem(*node.items[i]);
-		if (typeOf(x) != "string" || typeOf(y) != "string") {
-			throw CompileException(-1,
+		if (typeOf(x) != "string") {
+			throw CompileException(node.items[0]->position_begin,
+			                       "Concat operation requires string operands");
+		}
+		if (typeOf(y) != "string") {
+			throw CompileException(node.items[i]->position_begin,
 			                       "Concat operation requires string operands");
 		}
 		auto tmp = tempVar("string");
@@ -174,8 +181,12 @@ TAC::Value TAC::translateExpression(const ExpressionNode &node) {
 TAC::Value TAC::translateCondition(const ConditionNode &node) {
 	auto x = translateExpression(*node.lhs);
 	auto y = translateExpression(*node.rhs);
-	if (typeOf(x) != "string" || typeOf(y) != "string") {
-		throw CompileException(-1,
+	if (typeOf(x) != "string") {
+		throw CompileException(node.lhs->position_begin,
+		                       "Relation operator requires string operands");
+	}
+	if (typeOf(y) != "string") {
+		throw CompileException(node.rhs->position_begin,
 		                       "Relation operator requires string operands");
 	}
 	std::string op;
@@ -208,7 +219,7 @@ TAC::Value TAC::translateItem(const ItemNode &node) {
 	auto x = translateFactor(*node.factor);
 	for (auto repeat_time : node.repeat_times) {
 		if (typeOf(x) != "string") {
-			throw CompileException(-1,
+			throw CompileException(node.factor->position_begin,
 			                       "Repeat operator requires string operands");
 		}
 		auto tmp = tempVar("string");
@@ -245,7 +256,7 @@ TAC::Value TAC::translateStringFactor(const StringFactorNode &node) {
 }
 
 TAC::Value TAC::translateVariableFactor(const VariableFactorNode &node) {
-	return lookupVar(node.identifier);
+	return lookupVar(node.identifier, node.position_begin);
 }
 
 TAC::Value TAC::translateExpressionFactor(const ExpressionFactorNode &node) {
