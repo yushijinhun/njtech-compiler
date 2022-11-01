@@ -35,6 +35,19 @@ static std::ostream &operator<<(std::ostream &out,
 }
 
 std::ostream &operator<<(std::ostream &out, const TAC &tac) {
+	out << "Variables:\n";
+	for (const auto &[_, value] : tac.variable_table) {
+		out << value.type << " " << value.name;
+		if (value.temporary)
+			out << " (temporary)";
+		out << "\n";
+	}
+	out << "\nLiterals:\n";
+	for (const auto &literal : tac.literal_table) {
+		out << literal.type << " " << literal.value << "\n";
+	}
+	out << "\n";
+
 	int idx = 0;
 	for (const auto &instruction : tac.instructions) {
 		out << "(" << (idx++) << ") " << instruction << "\n";
@@ -77,6 +90,16 @@ void TAC::generate(const std::string &op, Instruction::Arg arg1,
 	    .result = result,
 	});
 	nextQ++;
+}
+
+TAC::Literal TAC::makeLiteral(const std::string &value,
+                              const std::string &type) {
+	Literal literal{
+	    .value = value,
+	    .type = type,
+	};
+	literal_table.insert(literal);
+	return literal;
 }
 
 TAC::TAC(const ProgramNode &ast) {
@@ -223,10 +246,7 @@ TAC::Value TAC::translateItem(const ItemNode &node) {
 			                       "Repeat operator requires string operands");
 		}
 		auto tmp = tempVar("string");
-		Literal arg2{
-		    .value = std::to_string(repeat_time),
-		    .type = "int",
-		};
+		auto arg2 = makeLiteral(std::to_string(repeat_time), "int");
 		generate("*", x, arg2, tmp);
 		x = tmp;
 	}
@@ -249,10 +269,7 @@ TAC::Value TAC::translateFactor(const FactorNode &node) {
 }
 
 TAC::Value TAC::translateStringFactor(const StringFactorNode &node) {
-	return Literal{
-	    .value = node.str,
-	    .type = "string",
-	};
+	return makeLiteral(node.str, "string");
 }
 
 TAC::Value TAC::translateVariableFactor(const VariableFactorNode &node) {
