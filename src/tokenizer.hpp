@@ -62,6 +62,6 @@ class Tokenizer {
 
 	char read();
 	void back();
-	void error(const std::string &error);
+	[[noreturn]] void error(const std::string &error);
 	Token emit(TokenType type);
 };
