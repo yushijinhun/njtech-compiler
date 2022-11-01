@@ -55,14 +55,6 @@ std::string to_string(TokenType x) {
 	}
 }
 
-LexicalException::LexicalException(int position, const std::string &error)
-    : position(position), error(error),
-      what_msg("At position " + std::to_string(position) + ": " + error) {}
-
-const char *LexicalException::what() const noexcept {
-	return what_msg.c_str();
-}
-
 enum class Tokenizer::State {
 	N_BEGIN,
 	LEFT_BRACKET,
@@ -111,6 +103,16 @@ enum class Tokenizer::State {
 Tokenizer::Tokenizer(std::function<char()> source)
     : source(source), current_ch('\0'), position(-1), state(State::N_BEGIN) {}
 
+Tokenizer::Tokenizer(std::istream &in)
+    : Tokenizer([&in] {
+	      char ch;
+	      if (in.get(ch)) {
+		      return ch;
+	      } else {
+		      return '\0';
+	      }
+      }) {}
+
 char Tokenizer::read() {
 	if (back_ch.has_value()) {
 		current_ch = *back_ch;
@@ -138,21 +140,23 @@ void Tokenizer::back() {
 }
 
 void Tokenizer::error(const std::string &error) {
-	throw LexicalException(position, error);
+	throw CompileException(position, error);
 }
 
 Token Tokenizer::emit(TokenType type) {
-	Token token = {type, std::string(buf.begin(), buf.end())};
+	Token token = {.type = type,
+	               .str = std::string(buf.begin(), buf.end()),
+	               .position = position - static_cast<int>(buf.size()) + 1};
 	state = State::N_BEGIN;
 	buf.clear();
 	return token;
 }
 
-constexpr bool is_digit(char ch) {
+static constexpr bool is_digit(char ch) {
 	return ch >= '0' && ch <= '9';
 }
 
-constexpr bool is_letter(char ch) {
+static constexpr bool is_letter(char ch) {
 	return ch >= 'a' && ch <= 'z';
 }
 
@@ -163,7 +167,7 @@ Token Tokenizer::next() {
 
 		case State::N_BEGIN:
 			if (ch == '\0') {
-				buf.pop_back(); // skip \0
+				back();
 				return emit(TokenType::END_OF_FILE);
 			} else if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r') {
 				buf.pop_back(); // skip whitespaces

@@ -15,3 +15,8 @@ add_executable(homework1
 	src/homework1.cpp
 	src/tokenizer.cpp
 )
+add_executable(test_parser
+	src/test_parser.cpp
+	src/tokenizer.cpp
+	src/parser.cpp
+)

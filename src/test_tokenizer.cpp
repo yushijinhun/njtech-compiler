@@ -3,24 +3,18 @@
 #include <iostream>
 
 int main() {
-	Tokenizer tokenizer([] {
-		char ch;
-		if (std::cin.get(ch)) {
-			return ch;
-		} else {
-			return '\0';
-		}
-	});
 	try {
+		Tokenizer tokenizer(std::cin);
 		for (;;) {
 			Token token;
 			token = tokenizer.next();
-			std::cout << std::left << std::setw(20) << to_string(token.type)
+			std::cout << std::left << std::setw(5) << token.position
+			          << std::left << std::setw(20) << to_string(token.type)
 			          << token.str << "\n";
 			if (token.type == TokenType::END_OF_FILE)
 				break;
 		}
-	} catch (LexicalException &ex) {
+	} catch (CompileException &ex) {
 		std::cerr << ex.what() << "\n";
 	}
 }

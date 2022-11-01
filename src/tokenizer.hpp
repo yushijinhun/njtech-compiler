@@ -1,8 +1,10 @@
 #pragma once
 
+#include "util.hpp"
 #include <functional>
+#include <istream>
+#include <memory>
 #include <optional>
-#include <stdexcept>
 #include <string>
 
 enum class TokenType {
@@ -34,27 +36,17 @@ enum class TokenType {
 
 std::string to_string(TokenType x);
 
-class LexicalException : public std::exception {
-  public:
-	const int position;
-	const std::string error;
-
-	explicit LexicalException(int position, const std::string &error);
-
-	virtual const char *what() const noexcept;
-
-  private:
-	const std::string what_msg;
-};
-
 struct Token {
 	TokenType type;
 	std::string str;
+	int position;
 };
 
 class Tokenizer {
   public:
 	explicit Tokenizer(std::function<char()> source);
+	explicit Tokenizer(std::istream &source);
+	Tokenizer(const Tokenizer &) = delete;
 
 	Token next();
 

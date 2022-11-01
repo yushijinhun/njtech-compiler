@@ -34,7 +34,7 @@ int main() {
 			if (token.type == TokenType::END_OF_FILE)
 				break;
 		}
-	} catch (LexicalException &ex) {
+	} catch (CompileException &ex) {
 		std::cerr << ex.what() << "\n";
 		return 1;
 	}
