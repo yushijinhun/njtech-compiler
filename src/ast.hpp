@@ -1,81 +1,47 @@
 #pragma once
 
 #include <memory>
+#include <ostream>
 #include <string>
 #include <vector>
 
-class VariableDeclarationNode;
-class StatementsNode;
-class StatementNode;
-class ExpressionNode;
-class ConditionNode;
-class ItemNode;
-class FactorNode;
-
-class ProgramNode {
+class ASTNode {
   public:
-	std::unique_ptr<VariableDeclarationNode> variables;
-	std::unique_ptr<StatementsNode> statements;
+	virtual void print_json(std::ostream &out) const = 0;
+	friend std::ostream &operator<<(std::ostream &out, const ASTNode &ast);
 };
 
-class VariableDeclarationNode {
-  public:
-	std::string type;
-	std::vector<std::string> identifiers;
-};
-
-class StatementsNode {
-  public:
-	std::vector<std::unique_ptr<StatementNode>> statements;
-};
-
-class StatementNode {};
-
-class AssignStatementNode : public StatementNode {
-  public:
-	std::string variable;
-	std::unique_ptr<ExpressionNode> expression;
-};
-
-class IfStatementNode : public StatementNode {
-  public:
-	std::unique_ptr<ConditionNode> condition;
-	std::unique_ptr<StatementsNode> true_action;
-	std::unique_ptr<StatementsNode> false_action;
-};
-
-class WhileStatementNode : public StatementNode {
-  public:
-	std::unique_ptr<ConditionNode> condition;
-	std::unique_ptr<StatementsNode> loop_action;
-};
-
-class ExpressionNode {
-  public:
-	std::vector<std::unique_ptr<ItemNode>> items;
-};
-
-class ItemNode {
-  public:
-	std::unique_ptr<FactorNode> factor;
-	std::vector<int> repeat_times;
-};
-
-class FactorNode {};
+class FactorNode : public ASTNode {};
 
 class StringFactorNode : public FactorNode {
   public:
 	std::string str;
+	void print_json(std::ostream &out) const;
 };
 
-class IdentifierFactorNode : public FactorNode {
+class VariableFactorNode : public FactorNode {
   public:
 	std::string identifier;
+	void print_json(std::ostream &out) const;
+};
+
+class ItemNode : public ASTNode {
+  public:
+	std::unique_ptr<FactorNode> factor;
+	std::vector<int> repeat_times;
+	void print_json(std::ostream &out) const;
+};
+
+class ExpressionNode : public ASTNode {
+  public:
+	std::vector<std::unique_ptr<ItemNode>> items;
+	void print_json(std::ostream &out) const;
 };
 
 class ExpressionFactorNode : public FactorNode {
   public:
 	std::unique_ptr<ExpressionNode> expression;
+	void print_json(std::ostream &out) const;
 };
 
 enum class RelationOp {
@@ -87,9 +53,54 @@ enum class RelationOp {
 	EQUAL
 };
 
-class ConditionNode {
+class ConditionNode : public ASTNode {
   public:
-	std::unique_ptr<ExpressionNode> lhs;
 	RelationOp op;
+	std::unique_ptr<ExpressionNode> lhs;
 	std::unique_ptr<ExpressionNode> rhs;
+	void print_json(std::ostream &out) const;
+};
+
+class StatementNode : public ASTNode {};
+
+class StatementsNode : public ASTNode {
+  public:
+	std::vector<std::unique_ptr<StatementNode>> statements;
+	void print_json(std::ostream &out) const;
+};
+
+class AssignStatementNode : public StatementNode {
+  public:
+	std::string variable;
+	std::unique_ptr<ExpressionNode> expression;
+	void print_json(std::ostream &out) const;
+};
+
+class IfStatementNode : public StatementNode {
+  public:
+	std::unique_ptr<ConditionNode> condition;
+	std::unique_ptr<StatementsNode> true_action;
+	std::unique_ptr<StatementsNode> false_action;
+	void print_json(std::ostream &out) const;
+};
+
+class DoWhileStatementNode : public StatementNode {
+  public:
+	std::unique_ptr<ConditionNode> condition;
+	std::unique_ptr<StatementsNode> loop_action;
+	void print_json(std::ostream &out) const;
+};
+
+class VariableDeclarationNode : public ASTNode {
+  public:
+	std::string type;
+	std::vector<std::string> identifiers;
+	void print_json(std::ostream &out) const;
+};
+
+class ProgramNode : public ASTNode {
+  public:
+	std::unique_ptr<VariableDeclarationNode> variables;
+	std::unique_ptr<StatementsNode> statements;
+	void print_json(std::ostream &out) const;
 };

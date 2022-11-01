@@ -6,8 +6,8 @@ int main() {
 	try {
 		Tokenizer tokenizer(std::cin);
 		Parser parser(tokenizer);
-		parser.parse();
-		std::cout << "Accept\n";
+		auto ast = parser.parse();
+		std::cout << *ast << "\n";
 	} catch (CompileException &ex) {
 		std::cerr << ex.what() << "\n";
 	}

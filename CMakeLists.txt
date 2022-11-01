@@ -19,4 +19,5 @@ add_executable(test_parser
 	src/test_parser.cpp
 	src/tokenizer.cpp
 	src/parser.cpp
+	src/ast.cpp
 )

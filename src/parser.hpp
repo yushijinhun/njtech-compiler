@@ -28,7 +28,7 @@ class Parser {
 	std::unique_ptr<StatementNode> parseStatement();
 	std::unique_ptr<AssignStatementNode> parseAssignStatement();
 	std::unique_ptr<IfStatementNode> parseIfStatement();
-	std::unique_ptr<WhileStatementNode> parseWhileStatement();
+	std::unique_ptr<DoWhileStatementNode> parseDoWhileStatement();
 	std::unique_ptr<ExpressionNode> parseExpression();
 	void parseExpressionMore(ExpressionNode &parent);
 	std::unique_ptr<ItemNode> parseItem();

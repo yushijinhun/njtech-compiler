@@ -114,7 +114,7 @@ std::unique_ptr<StatementNode> Parser::parseStatement() {
 	}
 
 	case TokenType::KEYWORD_DO: {
-		return parseWhileStatement();
+		return parseDoWhileStatement();
 	}
 
 	default:
@@ -144,8 +144,8 @@ std::unique_ptr<IfStatementNode> Parser::parseIfStatement() {
 	return ast;
 }
 
-std::unique_ptr<WhileStatementNode> Parser::parseWhileStatement() {
-	auto ast = std::make_unique<WhileStatementNode>();
+std::unique_ptr<DoWhileStatementNode> Parser::parseDoWhileStatement() {
+	auto ast = std::make_unique<DoWhileStatementNode>();
 	match(TokenType::KEYWORD_DO);
 	ast->loop_action = parseNestedStatement();
 	match(TokenType::KEYWORD_WHILE);
@@ -235,7 +235,7 @@ std::unique_ptr<FactorNode> Parser::parseFactor() {
 	switch (current.type) {
 
 	case TokenType::IDENTIFIER: {
-		auto ast = std::make_unique<IdentifierFactorNode>();
+		auto ast = std::make_unique<VariableFactorNode>();
 		auto identifier = match(TokenType::IDENTIFIER);
 		ast->identifier = std::move(identifier.str);
 		return ast;
