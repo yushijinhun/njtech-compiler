@@ -2,7 +2,6 @@
 
 #include "ast.hpp"
 #include "tokenizer.hpp"
-#include "util.hpp"
 #include <memory>
 
 class Parser {

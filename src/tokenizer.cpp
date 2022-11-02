@@ -1,4 +1,5 @@
 #include "tokenizer.hpp"
+#include "error.hpp"
 
 std::string to_string(TokenType x) {
 	switch (x) {

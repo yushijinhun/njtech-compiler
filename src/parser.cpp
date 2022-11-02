@@ -1,4 +1,5 @@
 #include "parser.hpp"
+#include "error.hpp"
 
 Parser::Parser(Tokenizer &tokenizer)
     : Parser([&tokenizer] { return tokenizer.next(); }) {}

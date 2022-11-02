@@ -1,6 +1,5 @@
 #pragma once
 
-#include "util.hpp"
 #include <functional>
 #include <istream>
 #include <memory>

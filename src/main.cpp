@@ -1,4 +1,5 @@
 #include "ast.hpp"
+#include "error.hpp"
 #include "parser.hpp"
 #include "tac.hpp"
 #include <iomanip>

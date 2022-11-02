@@ -1,5 +1,5 @@
 #include "tac.hpp"
-#include "util.hpp"
+#include "error.hpp"
 
 static std::ostream &operator<<(std::ostream &out,
                                 const TAC::Instruction::Arg &arg) {
