@@ -26,7 +26,9 @@ void Parser::error(const std::string &msg) {
 std::unique_ptr<ProgramNode> Parser::parse() {
 	next();
 	auto ast = parseProgram();
-	match(TokenType::END_OF_FILE);
+	if (current.type != TokenType::END_OF_FILE) {
+		error("Expect end of file");
+	}
 	return ast;
 }
 
