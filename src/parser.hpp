@@ -4,6 +4,8 @@
 #include "tokenizer.hpp"
 #include <memory>
 
+namespace compiler {
+
 class Parser {
   public:
 	explicit Parser(Tokenizer &tokenizer);
@@ -43,3 +45,5 @@ class Parser {
   private:
 	std::function<Token()> tokenizer;
 };
+
+} // namespace compiler

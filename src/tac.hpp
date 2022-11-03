@@ -6,6 +6,8 @@
 #include <set>
 #include <variant>
 
+namespace compiler {
+
 class TAC {
   public:
 	struct Variable {
@@ -91,3 +93,5 @@ class TAC {
 	Value translateVariableFactor(const VariableFactorNode &node);
 	Value translateExpressionFactor(const ExpressionFactorNode &node);
 };
+
+} // namespace compiler

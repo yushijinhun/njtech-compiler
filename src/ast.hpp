@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+namespace compiler {
+
 class ASTNode {
   public:
 	int position_begin;
@@ -108,3 +110,5 @@ class ProgramNode : public ASTNode {
 	std::unique_ptr<StatementsNode> statements;
 	void print_json(std::ostream &out) const;
 };
+
+} // namespace compiler

@@ -1,6 +1,8 @@
 #include "tokenizer.hpp"
 #include "error.hpp"
 
+namespace compiler {
+
 std::string to_string(TokenType x) {
 	switch (x) {
 	case TokenType::LEFT_BRACKET:
@@ -532,3 +534,5 @@ Token Tokenizer::next() {
 		}
 	}
 }
+
+} // namespace compiler

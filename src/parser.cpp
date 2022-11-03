@@ -1,6 +1,8 @@
 #include "parser.hpp"
 #include "error.hpp"
 
+namespace compiler {
+
 Parser::Parser(Tokenizer &tokenizer)
     : Parser([&tokenizer] { return tokenizer.next(); }) {}
 
@@ -372,3 +374,5 @@ std::unique_ptr<StatementsNode> Parser::parseNestedStatement() {
 		    to_string(current.type));
 	}
 }
+
+} // namespace compiler

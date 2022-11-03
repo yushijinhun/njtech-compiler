@@ -1,5 +1,7 @@
 #include "ast.hpp"
 
+namespace compiler {
+
 std::ostream &operator<<(std::ostream &out, const ASTNode &ast) {
 	ast.print_json(out);
 	return out;
@@ -117,3 +119,5 @@ void VariableFactorNode::print_json(std::ostream &out) const {
 void ExpressionFactorNode::print_json(std::ostream &out) const {
 	out << R"({"type":"expression","expression":)" << *expression << R"(})";
 }
+
+} // namespace compiler

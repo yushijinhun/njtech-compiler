@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+namespace compiler {
+
 class CompileException : public std::exception {
   public:
 	const int position;
@@ -18,3 +20,5 @@ class CompileException : public std::exception {
   private:
 	const std::string what_msg;
 };
+
+} // namespace compiler

@@ -1,6 +1,8 @@
 #include "tac.hpp"
 #include "error.hpp"
 
+namespace compiler {
+
 static std::ostream &operator<<(std::ostream &out,
                                 const TAC::Instruction::Arg &arg) {
 	if (!arg.has_value()) {
@@ -279,3 +281,5 @@ TAC::Value TAC::translateVariableFactor(const VariableFactorNode &node) {
 TAC::Value TAC::translateExpressionFactor(const ExpressionFactorNode &node) {
 	return translateExpression(*node.expression);
 }
+
+} // namespace compiler

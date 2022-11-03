@@ -6,6 +6,8 @@
 #include <optional>
 #include <string>
 
+namespace compiler {
+
 enum class TokenType {
 	LEFT_BRACKET,
 	RIGHT_BRACKET,
@@ -64,3 +66,5 @@ class Tokenizer {
 	[[noreturn]] void error(const std::string &error);
 	Token emit(TokenType type);
 };
+
+} // namespace compiler
