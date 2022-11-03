@@ -1,5 +1,6 @@
 #include "tokenizer.hpp"
 #include "error.hpp"
+#include <iomanip>
 
 namespace compiler {
 
@@ -152,6 +153,9 @@ Token Tokenizer::emit(TokenType type) {
 	               .position = position - static_cast<int>(buf.size()) + 1};
 	state = State::N_BEGIN;
 	buf.clear();
+	if (token_cb != nullptr) {
+		token_cb(token);
+	}
 	return token;
 }
 
@@ -533,6 +537,17 @@ Token Tokenizer::next() {
 			throw std::runtime_error("Tokenizer is in unexpected state!");
 		}
 	}
+}
+
+void Tokenizer::set_token_callback(std::function<void(const Token &)> cb) {
+	this->token_cb = cb;
+}
+
+void Tokenizer::set_print_token_to(std::ostream &out) {
+	this->token_cb = [&out](const Token &token) {
+		out << std::left << std::setw(5) << token.position << std::left
+		    << std::setw(20) << to_string(token.type) << token.str << "\n";
+	};
 }
 
 } // namespace compiler

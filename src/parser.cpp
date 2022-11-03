@@ -36,6 +36,7 @@ std::unique_ptr<ProgramNode> Parser::parse() {
 }
 
 std::unique_ptr<ProgramNode> Parser::parseProgram() {
+	logp("<PROGRAM> ::= <VAR_DECLARES> SEMICOLON <STATEMENTS>");
 	auto ast = std::make_unique<ProgramNode>();
 	ast->position_begin = current.position;
 	ast->variables = parseVarDeclares();
@@ -46,6 +47,7 @@ std::unique_ptr<ProgramNode> Parser::parseProgram() {
 }
 
 std::unique_ptr<VariableDeclarationNode> Parser::parseVarDeclares() {
+	logp("<VAR_DECLARES> ::= <VAR_TYPE> <IDENTIFIER_LIST>");
 	auto ast = std::make_unique<VariableDeclarationNode>();
 	ast->position_begin = current.position;
 	parseVarType(*ast);
@@ -55,11 +57,13 @@ std::unique_ptr<VariableDeclarationNode> Parser::parseVarDeclares() {
 }
 
 void Parser::parseVarType(VariableDeclarationNode &parent) {
+	logp("<VAR_TYPE> ::= KEYWORD_STRING");
 	auto type = match(TokenType::KEYWORD_STRING);
 	parent.type = std::move(type.str);
 }
 
 void Parser::parseIdentifierList(VariableDeclarationNode &parent) {
+	logp("<IDENTIFIER_LIST> ::= IDENTIFIER <IDENTIFIER_LIST_MORE>");
 	auto identifier = match(TokenType::IDENTIFIER);
 	parent.identifiers.push_back(std::move(identifier.str));
 	parseIdentifierListMore(parent);
@@ -69,6 +73,8 @@ void Parser::parseIdentifierListMore(VariableDeclarationNode &parent) {
 	switch (current.type) {
 
 	case TokenType::COMMA: {
+		logp("<IDENTIFIER_LIST_MORE> ::= COMMA IDENTIFIER "
+		     "<IDENTIFIER_LIST_MORE>");
 		match(TokenType::COMMA);
 		auto identifier = match(TokenType::IDENTIFIER);
 		parent.identifiers.push_back(std::move(identifier.str));
@@ -77,6 +83,7 @@ void Parser::parseIdentifierListMore(VariableDeclarationNode &parent) {
 	}
 
 	case TokenType::SEMICOLON:
+		logp("<IDENTIFIER_LIST_MORE> ::= ε");
 		return;
 
 	default:
@@ -85,6 +92,7 @@ void Parser::parseIdentifierListMore(VariableDeclarationNode &parent) {
 }
 
 std::unique_ptr<StatementsNode> Parser::parseStatements() {
+	logp("<STATEMENTS> ::= <STATEMENT> SEMICOLON <STATEMENTS_MORE>");
 	auto ast = std::make_unique<StatementsNode>();
 	ast->position_begin = current.position;
 	ast->statements.push_back(parseStatement());
@@ -100,6 +108,7 @@ void Parser::parseStatementsMore(StatementsNode &parent) {
 	case TokenType::IDENTIFIER:
 	case TokenType::KEYWORD_IF:
 	case TokenType::KEYWORD_DO: {
+		logp("<STATEMENTS_MORE> ::= <STATEMENT> SEMICOLON <STATEMENTS_MORE>");
 		parent.statements.push_back(parseStatement());
 		match(TokenType::SEMICOLON);
 		parseStatementsMore(parent);
@@ -108,6 +117,7 @@ void Parser::parseStatementsMore(StatementsNode &parent) {
 
 	case TokenType::END_OF_FILE:
 	case TokenType::KEYWORD_END:
+		logp("<STATEMENTS_MORE> ::= ε");
 		return;
 
 	default:
@@ -121,14 +131,17 @@ std::unique_ptr<StatementNode> Parser::parseStatement() {
 	switch (current.type) {
 
 	case TokenType::IDENTIFIER: {
+		logp("<STATEMENT> ::= <ASSIGN_STATEMENT>");
 		return parseAssignStatement();
 	}
 
 	case TokenType::KEYWORD_IF: {
+		logp("<STATEMENT> ::= <IF_STATEMENT>");
 		return parseIfStatement();
 	}
 
 	case TokenType::KEYWORD_DO: {
+		logp("<STATEMENT> ::= <WHILE_STATEMENT>");
 		return parseDoWhileStatement();
 	}
 
@@ -139,6 +152,7 @@ std::unique_ptr<StatementNode> Parser::parseStatement() {
 }
 
 std::unique_ptr<AssignStatementNode> Parser::parseAssignStatement() {
+	logp("<ASSIGN_STATEMENT> ::= IDENTIFIER OP_ASSIGNMENT <EXPRESSION>");
 	auto ast = std::make_unique<AssignStatementNode>();
 	ast->position_begin = current.position;
 	auto identifier = match(TokenType::IDENTIFIER);
@@ -150,6 +164,8 @@ std::unique_ptr<AssignStatementNode> Parser::parseAssignStatement() {
 }
 
 std::unique_ptr<IfStatementNode> Parser::parseIfStatement() {
+	logp("<IF_STATEMENT> ::= KEYWORD_IF LEFT_BRACKET <CONDITION> RIGHT_BRACKET "
+	     "<NESTED_STATEMENT> KEYWORD_ELSE <NESTED_STATEMENT>");
 	auto ast = std::make_unique<IfStatementNode>();
 	ast->position_begin = current.position;
 	match(TokenType::KEYWORD_IF);
@@ -164,6 +180,8 @@ std::unique_ptr<IfStatementNode> Parser::parseIfStatement() {
 }
 
 std::unique_ptr<DoWhileStatementNode> Parser::parseDoWhileStatement() {
+	logp("<WHILE_STATEMENT> ::= KEYWORD_DO <NESTED_STATEMENT> KEYWORD_WHILE "
+	     "LEFT_BRACKET <CONDITION> RIGHT_BRACKET");
 	auto ast = std::make_unique<DoWhileStatementNode>();
 	ast->position_begin = current.position;
 	match(TokenType::KEYWORD_DO);
@@ -177,6 +195,7 @@ std::unique_ptr<DoWhileStatementNode> Parser::parseDoWhileStatement() {
 }
 
 std::unique_ptr<ExpressionNode> Parser::parseExpression() {
+	logp("<EXPRESSION> ::= <ITEM> <EXPRESSION_MORE>");
 	auto ast = std::make_unique<ExpressionNode>();
 	ast->position_begin = current.position;
 	ast->items.push_back(parseItem());
@@ -189,6 +208,7 @@ void Parser::parseExpressionMore(ExpressionNode &parent) {
 	switch (current.type) {
 
 	case TokenType::OP_CONCAT: {
+		logp("<EXPRESSION_MORE> ::= OP_CONCAT <ITEM> <EXPRESSION_MORE>");
 		match(TokenType::OP_CONCAT);
 		parent.items.push_back(parseItem());
 		parseExpressionMore(parent);
@@ -205,6 +225,7 @@ void Parser::parseExpressionMore(ExpressionNode &parent) {
 	case TokenType::OP_GREATER_EQUAL:
 	case TokenType::OP_LESS_EQUAL:
 	case TokenType::OP_EQUAL:
+		logp("<EXPRESSION_MORE> ::= ε");
 		return;
 
 	default:
@@ -216,6 +237,7 @@ void Parser::parseExpressionMore(ExpressionNode &parent) {
 }
 
 std::unique_ptr<ItemNode> Parser::parseItem() {
+	logp("<ITEM> ::= <FACTOR> <ITEM_MORE>");
 	auto ast = std::make_unique<ItemNode>();
 	ast->position_begin = current.position;
 	ast->factor = parseFactor();
@@ -228,6 +250,7 @@ void Parser::parseItemMore(ItemNode &parent) {
 	switch (current.type) {
 
 	case TokenType::OP_REPEAT: {
+		logp("<ITEM_MORE> ::= OP_REPEAT NUMBER <ITEM_MORE>");
 		match(TokenType::OP_REPEAT);
 		auto repeat_time = match(TokenType::NUMBER);
 		parent.repeat_times.push_back(std::stoi(repeat_time.str));
@@ -246,6 +269,7 @@ void Parser::parseItemMore(ItemNode &parent) {
 	case TokenType::OP_GREATER_EQUAL:
 	case TokenType::OP_LESS_EQUAL:
 	case TokenType::OP_EQUAL:
+		logp("<ITEM_MORE> ::= ε");
 		return;
 
 	default:
@@ -260,6 +284,7 @@ std::unique_ptr<FactorNode> Parser::parseFactor() {
 	switch (current.type) {
 
 	case TokenType::IDENTIFIER: {
+		logp("<FACTOR> ::= IDENTIFIER");
 		auto ast = std::make_unique<VariableFactorNode>();
 		ast->position_begin = current.position;
 		auto identifier = match(TokenType::IDENTIFIER);
@@ -269,6 +294,7 @@ std::unique_ptr<FactorNode> Parser::parseFactor() {
 	}
 
 	case TokenType::STRING: {
+		logp("<FACTOR> ::= STRING");
 		auto ast = std::make_unique<StringFactorNode>();
 		ast->position_begin = current.position;
 		auto string = match(TokenType::STRING);
@@ -279,6 +305,7 @@ std::unique_ptr<FactorNode> Parser::parseFactor() {
 	}
 
 	case TokenType::LEFT_BRACKET: {
+		logp("<FACTOR> ::= LEFT_BRACKET <EXPRESSION> RIGHT_BRACKET");
 		auto ast = std::make_unique<ExpressionFactorNode>();
 		ast->position_begin = current.position;
 		match(TokenType::LEFT_BRACKET);
@@ -298,31 +325,37 @@ RelationOp Parser::parseRelationOp() {
 	switch (current.type) {
 
 	case TokenType::OP_LESS: {
+		logp("<RELATION_OP> ::= OP_LESS");
 		match(TokenType::OP_LESS);
 		return RelationOp::LESS;
 	}
 
 	case TokenType::OP_GREATER: {
+		logp("<RELATION_OP> ::= OP_GREATER");
 		match(TokenType::OP_GREATER);
 		return RelationOp::GREATER;
 	}
 
 	case TokenType::OP_NOT_EQUAL: {
+		logp("<RELATION_OP> ::= OP_NOT_EQUAL");
 		match(TokenType::OP_NOT_EQUAL);
 		return RelationOp::NOT_EQUAL;
 	}
 
 	case TokenType::OP_GREATER_EQUAL: {
+		logp("<RELATION_OP> ::= OP_GREATER_EQUAL");
 		match(TokenType::OP_GREATER_EQUAL);
 		return RelationOp::GREATER_EQUAL;
 	}
 
 	case TokenType::OP_LESS_EQUAL: {
+		logp("<RELATION_OP> ::= OP_LESS_EQUAL");
 		match(TokenType::OP_LESS_EQUAL);
 		return RelationOp::LESS_EQUAL;
 	}
 
 	case TokenType::OP_EQUAL: {
+		logp("<RELATION_OP> ::= OP_EQUAL");
 		match(TokenType::OP_EQUAL);
 		return RelationOp::EQUAL;
 	}
@@ -335,6 +368,7 @@ RelationOp Parser::parseRelationOp() {
 }
 
 std::unique_ptr<ConditionNode> Parser::parseCondition() {
+	logp("<CONDITION> ::= <EXPRESSION> <RELATION_OP> <EXPRESSION>");
 	auto ast = std::make_unique<ConditionNode>();
 	ast->position_begin = current.position;
 	ast->lhs = parseExpression();
@@ -345,6 +379,7 @@ std::unique_ptr<ConditionNode> Parser::parseCondition() {
 }
 
 std::unique_ptr<StatementsNode> Parser::parseCompoundStatement() {
+	logp("<COMPOUND_STATEMENT> ::= KEYWORD_START <STATEMENTS> KEYWORD_END");
 	match(TokenType::KEYWORD_START);
 	auto ast = parseStatements();
 	match(TokenType::KEYWORD_END);
@@ -357,6 +392,7 @@ std::unique_ptr<StatementsNode> Parser::parseNestedStatement() {
 	case TokenType::IDENTIFIER:
 	case TokenType::KEYWORD_IF:
 	case TokenType::KEYWORD_DO: {
+		logp("<NESTED_STATEMENT> ::= <STATEMENT>");
 		auto ast = std::make_unique<StatementsNode>();
 		ast->position_begin = current.position;
 		ast->statements.push_back(parseStatement());
@@ -365,6 +401,7 @@ std::unique_ptr<StatementsNode> Parser::parseNestedStatement() {
 	}
 
 	case TokenType::KEYWORD_START: {
+		logp("<NESTED_STATEMENT> ::= <COMPOUND_STATEMENT>");
 		return parseCompoundStatement();
 	}
 
@@ -373,6 +410,23 @@ std::unique_ptr<StatementsNode> Parser::parseNestedStatement() {
 		    "Expect IDENTIFIER, KEYWORD_IF, KEYWORD_DO or KEYWORD_START, got " +
 		    to_string(current.type));
 	}
+}
+
+void Parser::logp(const std::string &p) {
+	if (production_cb != nullptr) {
+		production_cb(p);
+	}
+}
+
+void Parser::set_production_callback(
+    std::function<void(const std::string &)> cb) {
+	this->production_cb = cb;
+}
+
+void Parser::set_print_production_to(std::ostream &out) {
+	this->production_cb = [&out](const std::string &production) {
+		out << production << "\n";
+	};
 }
 
 } // namespace compiler

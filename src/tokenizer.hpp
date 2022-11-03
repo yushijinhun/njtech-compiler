@@ -51,6 +51,9 @@ class Tokenizer {
 
 	Token next();
 
+	void set_token_callback(std::function<void(const Token &)> cb);
+	void set_print_token_to(std::ostream &out);
+
   private:
 	enum class State;
 
@@ -60,6 +63,7 @@ class Tokenizer {
 	int position;
 	std::vector<char> buf;
 	State state;
+	std::function<void(const Token &)> token_cb;
 
 	char read();
 	void back();

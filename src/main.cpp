@@ -7,20 +7,15 @@
 #include "tac.hpp"
 #include <cstdlib>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
 #include <llvm/Support/raw_os_ostream.h>
 
 int main() {
 	try {
 		compiler::Tokenizer tokenizer(std::cin);
-		compiler::Parser parser([&tokenizer] {
-			auto token = tokenizer.next();
-			std::cout << std::left << std::setw(5) << token.position
-			          << std::left << std::setw(20) << to_string(token.type)
-			          << token.str << "\n";
-			return token;
-		});
+		tokenizer.set_print_token_to(std::cout);
+		compiler::Parser parser(tokenizer);
+		parser.set_print_production_to(std::cout);
 		auto ast = parser.parse();
 		std::cout << "\n";
 		std::cout << "---- TAC ----\n" << compiler::TAC(*ast) << "\n";
@@ -60,13 +55,13 @@ int main() {
 		*/
 		{
 			// write to program.o
-			std::cout << "--- Writing to program.o ----\n";
+			std::cout << "--- Writing object code to program.o ----\n";
 			compiler::aot::compile_object_file(*module, "program.o");
 			std::cout << "OK!\n\n";
 		}
 		{
 			// write to program.s
-			std::cout << "--- Writing to program.s ----\n";
+			std::cout << "--- Writing ASM code to program.s ----\n";
 			compiler::aot::compile_asm_file(*module, "program.s");
 			std::cout << "OK!\n\n";
 		}

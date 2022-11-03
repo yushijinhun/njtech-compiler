@@ -12,14 +12,21 @@ class Parser {
 	explicit Parser(std::function<Token()> tokenizer);
 	Parser(const Parser &) = delete;
 
+	void set_production_callback(std::function<void(const std::string &)> cb);
+	void set_print_production_to(std::ostream &out);
+
 	std::unique_ptr<ProgramNode> parse();
 
   private:
+	std::function<Token()> tokenizer;
 	int last_token_end;
 	Token current;
+	std::function<void(const std::string &)> production_cb;
+
 	void next();
 	Token match(TokenType type);
 	[[noreturn]] void error(const std::string &msg);
+	void logp(const std::string &msg);
 
 	std::unique_ptr<ProgramNode> parseProgram();
 	std::unique_ptr<VariableDeclarationNode> parseVarDeclares();
@@ -41,9 +48,6 @@ class Parser {
 	std::unique_ptr<ConditionNode> parseCondition();
 	std::unique_ptr<StatementsNode> parseCompoundStatement();
 	std::unique_ptr<StatementsNode> parseNestedStatement();
-
-  private:
-	std::function<Token()> tokenizer;
 };
 
 } // namespace compiler
