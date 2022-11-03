@@ -544,10 +544,13 @@ void Tokenizer::set_token_callback(std::function<void(const Token &)> cb) {
 }
 
 void Tokenizer::set_print_token_to(std::ostream &out) {
-	this->token_cb = [&out](const Token &token) {
-		out << std::left << std::setw(5) << token.position << std::left
-		    << std::setw(20) << to_string(token.type) << token.str << "\n";
-	};
+	this->token_cb = [&out](const Token &token) { out << token; };
+}
+
+std::ostream &operator<<(std::ostream &os, const Token &token) {
+	os << std::left << std::setw(5) << token.position << std::left
+	   << std::setw(20) << to_string(token.type) << token.str << "\n";
+	return os;
 }
 
 } // namespace compiler

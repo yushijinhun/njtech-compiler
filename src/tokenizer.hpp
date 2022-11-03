@@ -41,6 +41,8 @@ struct Token {
 	TokenType type;
 	std::string str;
 	int position;
+
+	friend std::ostream &operator<<(std::ostream &os, const Token &token);
 };
 
 class Tokenizer {
