@@ -1,1 +1,0 @@
-string x,f53,ai;x="n";f53="swp";ai="n";x="ymp"*7*4+f53*4*8*3; if(ai+"uer"<=x) f53=x*5 else start ai=f53*5;ai=f53*1;end;do f53=x*7 while(ai+"y">=x*8);
