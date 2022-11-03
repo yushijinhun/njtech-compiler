@@ -83,7 +83,7 @@ void Parser::parseIdentifierListMore(VariableDeclarationNode &parent) {
 	}
 
 	case TokenType::SEMICOLON:
-		logp("<IDENTIFIER_LIST_MORE> ::= ε");
+		logp("<IDENTIFIER_LIST_MORE> ::= none");
 		return;
 
 	default:
@@ -117,7 +117,7 @@ void Parser::parseStatementsMore(StatementsNode &parent) {
 
 	case TokenType::END_OF_FILE:
 	case TokenType::KEYWORD_END:
-		logp("<STATEMENTS_MORE> ::= ε");
+		logp("<STATEMENTS_MORE> ::= none");
 		return;
 
 	default:
@@ -225,7 +225,7 @@ void Parser::parseExpressionMore(ExpressionNode &parent) {
 	case TokenType::OP_GREATER_EQUAL:
 	case TokenType::OP_LESS_EQUAL:
 	case TokenType::OP_EQUAL:
-		logp("<EXPRESSION_MORE> ::= ε");
+		logp("<EXPRESSION_MORE> ::= none");
 		return;
 
 	default:
@@ -269,7 +269,7 @@ void Parser::parseItemMore(ItemNode &parent) {
 	case TokenType::OP_GREATER_EQUAL:
 	case TokenType::OP_LESS_EQUAL:
 	case TokenType::OP_EQUAL:
-		logp("<ITEM_MORE> ::= ε");
+		logp("<ITEM_MORE> ::= none");
 		return;
 
 	default:
