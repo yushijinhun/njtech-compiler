@@ -4,6 +4,7 @@
 #include "jit.hpp"
 #include "parser.hpp"
 #include "tac.hpp"
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <llvm/Support/raw_os_ostream.h>
@@ -27,6 +28,12 @@ int main() {
 		auto module = compiler::LLVMCodeGen::fromAST(*llvm_ctx, *ast);
 
 		std::cout << "---- LLVM IR ----\n";
+		{
+			// write to program.ll
+			std::ofstream fout("program.ll");
+			llvm::raw_os_ostream file_stream(fout);
+			module->print(file_stream, nullptr);
+		}
 		llvm::raw_os_ostream file_stream(std::cout);
 		module->print(file_stream, nullptr);
 		std::cout << "\n";
