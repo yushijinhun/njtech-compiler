@@ -17,7 +17,8 @@ void initialize() {
 	llvm::InitializeNativeTargetAsmParser();
 }
 
-void generate_object(llvm::Module &module, const std::string &filename) {
+void compile(llvm::Module &module, llvm::CodeGenFileType type,
+             llvm::raw_pwrite_stream &out) {
 	auto target_triple = llvm::sys::getDefaultTargetTriple();
 	std::string error;
 	auto *target = llvm::TargetRegistry::lookupTarget(target_triple, error);
@@ -27,25 +28,33 @@ void generate_object(llvm::Module &module, const std::string &filename) {
 
 	llvm::TargetOptions opt;
 
-	auto *target_machine = target->createTargetMachine(
-	    target_triple, "generic", "", opt, llvm::Reloc::Model::PIC_);
-
-	std::error_code ec;
-	llvm::raw_fd_ostream dest(filename, ec, llvm::sys::fs::OF_None);
-	if (ec) {
-		throw CompileException(-1, "Could not open file: " + ec.message());
-	}
+	std::unique_ptr<llvm::LLVMTargetMachine> target_machine(
+	    dynamic_cast<llvm::LLVMTargetMachine *>(target->createTargetMachine(
+	        target_triple, "generic", "", opt, llvm::Reloc::Model::PIC_)));
 
 	llvm::legacy::PassManager pass;
-	auto file_type = llvm::CGFT_ObjectFile;
 
-	if (target_machine->addPassesToEmitFile(pass, dest, nullptr, file_type)) {
+	if (target_machine->addPassesToEmitFile(pass, out, nullptr, type))
 		throw CompileException(-1,
-		                       "Target machine can't emit a file of this type");
-	}
+		                       "Target machine can't emit code of given type");
 
 	pass.run(module);
-	dest.flush();
+}
+
+void compile_object_file(llvm::Module &module, const std::string &output_file) {
+	std::error_code ec;
+	llvm::raw_fd_ostream dest(output_file, ec);
+	if (ec)
+		throw CompileException(-1, "Could not open file: " + ec.message());
+	compile(module, llvm::CodeGenFileType::CGFT_ObjectFile, dest);
+}
+
+void compile_asm_file(llvm::Module &module, const std::string &output_file) {
+	std::error_code ec;
+	llvm::raw_fd_ostream dest(output_file, ec);
+	if (ec)
+		throw CompileException(-1, "Could not open file: " + ec.message());
+	compile(module, llvm::CodeGenFileType::CGFT_AssemblyFile, dest);
 }
 
 } // namespace aot

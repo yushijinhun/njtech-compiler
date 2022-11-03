@@ -7,7 +7,12 @@ namespace aot {
 
 void initialize();
 
-void generate_object(llvm::Module &module, const std::string &filename);
+void compile(llvm::Module &module, llvm::CodeGenFileType type,
+             llvm::raw_pwrite_stream &out);
+
+void compile_object_file(llvm::Module &module, const std::string &output_file);
+
+void compile_asm_file(llvm::Module &module, const std::string &output_file);
 
 } // namespace aot
 } // namespace compiler
