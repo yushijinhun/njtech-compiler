@@ -611,9 +611,10 @@ void LLVMCodeGen::visitAssignStatement(const AssignStatementNode &node) {
 	    builder.CreateLoad(builder.getInt8PtrTy(), var_ptr, "_assign_oldstr");
 	genStrFree(oldstr);
 
+	llvm::Value *newval;
 	if (expr.transient) {
 		// Move
-		builder.CreateStore(expr.val, var_ptr);
+		newval = expr.val;
 	} else {
 		// Copy
 		if (!expr.strlen.has_value()) {
@@ -628,7 +629,18 @@ void LLVMCodeGen::visitAssignStatement(const AssignStatementNode &node) {
 		    size, nullptr, nullptr, "_assign_dst");
 		builder.Insert(dst);
 		builder.CreateMemCpy(dst, llvm::Align(), src, llvm::Align(), size);
-		builder.CreateStore(dst, var_ptr);
+		newval = dst;
+	}
+	builder.CreateStore(newval, var_ptr);
+
+	if (debug_mode) {
+		auto *printf_template = builder.CreateGlobalStringPtr(
+		    node.variable + " := %s\n",
+		    "_debug_assign_template_" + node.variable);
+		auto printfFunc = module->getOrInsertFunction(
+		    "printf", llvm::FunctionType::get(builder.getInt32Ty(),
+		                                      builder.getInt8PtrTy(), true));
+		builder.CreateCall(printfFunc, {printf_template, newval});
 	}
 }
 
@@ -711,16 +723,15 @@ LLVMCodeGen::LLVMCodeGen(llvm::LLVMContext &ctx) : ctx(ctx), builder(ctx) {
 }
 
 std::unique_ptr<llvm::Module> LLVMCodeGen::fromAST(llvm::LLVMContext &ctx,
-                                                   const ProgramNode &node) {
+                                                   const ProgramNode &node,
+                                                   bool debug_mode) {
 	LLVMCodeGen codegen(ctx);
+	codegen.debug_mode = debug_mode;
 	codegen.visitProgram(node);
 	return std::move(codegen.module);
 }
 
 void LLVMCodeGen::genPrintVariables() {
-	auto printfFunc = module->getOrInsertFunction(
-	    "printf", llvm::FunctionType::get(builder.getInt32Ty(),
-	                                      builder.getInt8PtrTy(), true));
 	for (auto &[name, var_ptr] : variables) {
 		auto *entry = builder.GetInsertBlock();
 		auto *current_func = entry->getParent();
@@ -746,6 +757,9 @@ void LLVMCodeGen::genPrintVariables() {
 
 		auto *printf_template = builder.CreateGlobalStringPtr(
 		    name + " = %s\n", "_display_template_" + name);
+		auto printfFunc = module->getOrInsertFunction(
+		    "printf", llvm::FunctionType::get(builder.getInt32Ty(),
+		                                      builder.getInt8PtrTy(), true));
 		builder.CreateCall(printfFunc, {printf_template, msg});
 	}
 }

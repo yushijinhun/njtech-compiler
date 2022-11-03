@@ -14,6 +14,7 @@ static bool opt_help = false;
 static bool opt_interactive = false;
 static bool opt_optimize = false;
 static bool opt_jit_run = false;
+static bool opt_debug = false;
 static std::string opt_infile = "in.txt";
 
 static bool parse_commandline(int argc, char *argv[]) {
@@ -35,6 +36,10 @@ static bool parse_commandline(int argc, char *argv[]) {
 
 		} else if (arg == "-j" || arg == "--jit-run") {
 			opt_jit_run = true;
+			idx++;
+
+		} else if (arg == "-d" || arg == "--debug") {
+			opt_debug = true;
 			idx++;
 
 		} else if (arg == "-f" || arg == "--infile") {
@@ -64,6 +69,7 @@ Options:
   -f/--infile <path>  use specified source program (see below)
   -o/--optimize       turn on compilation optimization
   -j/--jit-run        run the program using JIT after compilation
+  -d/--debug          compile the program in debug mode (print each assignment)
 
 By default, the source program is read from "in.txt". The file path can be
 changed using the -f/--infile argument. If -i/--interactive argument is
@@ -103,7 +109,8 @@ static int run(std::istream &in) {
 		auto ast = parser.parse();
 		auto tac = compiler::TAC(*ast);
 		auto llvm_ctx = std::make_unique<llvm::LLVMContext>();
-		auto module = compiler::LLVMCodeGen::fromAST(*llvm_ctx, *ast);
+		auto module =
+		    compiler::LLVMCodeGen::fromAST(*llvm_ctx, *ast, opt_debug);
 
 		{
 			std::cout

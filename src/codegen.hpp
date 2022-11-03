@@ -11,7 +11,8 @@ namespace compiler {
 class LLVMCodeGen {
   public:
 	static std::unique_ptr<llvm::Module> fromAST(llvm::LLVMContext &ctx,
-	                                             const ProgramNode &node);
+	                                             const ProgramNode &node,
+	                                             bool debug_mode = false);
 
   private:
 	explicit LLVMCodeGen(llvm::LLVMContext &ctx);
@@ -22,6 +23,7 @@ class LLVMCodeGen {
 		std::optional<llvm::Value *> strlen;
 	};
 
+	bool debug_mode;
 	llvm::LLVMContext &ctx;
 	std::unique_ptr<llvm::Module> module;
 	llvm::IRBuilder<> builder;
