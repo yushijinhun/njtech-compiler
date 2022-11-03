@@ -23,6 +23,7 @@ add_executable(compiler
 	src/tac.cpp
 	src/codegen.cpp
 	src/jit.cpp
+	src/aot.cpp
 )
 llvm_map_components_to_libnames(llvm_libs core orcjit native)
 target_link_libraries(compiler ${llvm_libs})
