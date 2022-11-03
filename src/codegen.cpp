@@ -1,6 +1,7 @@
 #include "codegen.hpp"
 #include "error.hpp"
 #include <llvm/IR/Constants.h>
+#include <llvm/IR/Verifier.h>
 
 namespace compiler {
 
@@ -701,6 +702,8 @@ void LLVMCodeGen::visitProgram(const ProgramNode &node) {
 		genStrFree(var);
 	}
 	builder.CreateRet(builder.getInt32(0));
+
+	verify(mainFunc, node.position_begin);
 }
 
 LLVMCodeGen::LLVMCodeGen(llvm::LLVMContext &ctx) : ctx(ctx), builder(ctx) {
@@ -744,6 +747,14 @@ void LLVMCodeGen::genPrintVariables() {
 		auto *printf_template = builder.CreateGlobalStringPtr(
 		    name + " = %s\n", "_display_template_" + name);
 		builder.CreateCall(printfFunc, {printf_template, msg});
+	}
+}
+
+void LLVMCodeGen::verify(llvm::Function *function, int position) {
+	std::string err;
+	llvm::raw_string_ostream err_stream(err);
+	if (llvm::verifyFunction(*function, &err_stream)) {
+		throw CompileException(position, err);
 	}
 }
 

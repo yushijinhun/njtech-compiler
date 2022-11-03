@@ -5,6 +5,7 @@
 #include "jit.hpp"
 #include "parser.hpp"
 #include "tac.hpp"
+#include <cstdlib>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -45,6 +46,18 @@ int main() {
 		}
 
 		compiler::aot::initialize();
+		/* Optimization is disabled because it would increase code size dramatically
+		{
+			// write to program_optimized.ll
+			std::cout << "--- Writing optimized LLVM IR to "
+			             "program_optimized.ll ----\n";
+			compiler::aot::optimize(*module);
+			std::ofstream fout("program_optimized.ll");
+			llvm::raw_os_ostream file_stream(fout);
+			module->print(file_stream, nullptr);
+			std::cout << "OK!\n\n";
+		}
+		*/
 		{
 			// write to program.o
 			std::cout << "--- Writing to program.o ----\n";
@@ -56,6 +69,16 @@ int main() {
 			std::cout << "--- Writing to program.s ----\n";
 			compiler::aot::compile_asm_file(*module, "program.s");
 			std::cout << "OK!\n\n";
+		}
+		{
+			// invoke cc to link executable
+			std::cout << "--- Invoking cc to link executable ----\n";
+			int ret = std::system("cc program.o -o program");
+			if (ret == 0) {
+				std::cout << "OK!\n\n";
+			} else {
+				std::cout << "Error! Return code " << ret << "\n\n";
+			}
 		}
 
 		std::cout << "---- JIT Execution ----\n";

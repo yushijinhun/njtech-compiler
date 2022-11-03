@@ -47,6 +47,8 @@ class LLVMCodeGen {
 	void visitStatement(const StatementNode &node);
 	void visitStatements(const StatementsNode &node);
 	void visitProgram(const ProgramNode &node);
+
+	void verify(llvm::Function *function, int position);
 };
 
 } // namespace compiler
