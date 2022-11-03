@@ -25,8 +25,3 @@ add_executable(compiler
 )
 llvm_map_components_to_libnames(llvm_libs support core irreader orcjit native)
 target_link_libraries(compiler ${llvm_libs})
-
-add_executable(test
-	src/test.cpp
-)
-target_link_libraries(test ${llvm_libs})
